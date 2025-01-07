@@ -1,6 +1,8 @@
 #include <Windows.h>
 #include "resource.h"
 
+CONST CHAR* g_VALUES[] = { "This", "is","my", "first", "Combo", "Box" };
+
 BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
@@ -13,8 +15,40 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 	case WM_INITDIALOG:
-		break;
+	{
+		HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+		SendMessage(hwnd, WM_SETICON, 0, (LPARAM)hIcon);
+	
+		HWND hCombo = GetDlgItem(hwnd, IDC_COMBO);
+		//GetDlgItem(HWND, RESOURCE_ID); возвращает hwnd дочернего окна по ID ресурса.
+		for (int i = 0; i < sizeof(g_VALUES) / sizeof(g_VALUES[0]); i++)
+		{
+			SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)g_VALUES[i]);
+			//CB_ComboBox
+		}
+		SendMessage(hCombo, CB_SETCURSEL, 0, 0);
+	}
+	break;
 	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDOK:
+		{
+			CONST INT SIZE = 256;
+			CHAR sz_buffer[SIZE]{};//sz_buffer String Zero (NULL TerminateLine)
+			HWND hCombo = GetDlgItem(hwnd, IDC_COMBO);
+			INT i = SendMessage(hCombo, CB_GETCURSEL, 0, 0);
+			//GetCurentSelection - возвращает номер выделенного элемента ComboBox элементы нумеруются с 0
+			SendMessage(hCombo, CB_GETLBTEXT, i, (LPARAM)sz_buffer);
+			//Сохраняет текст указанного элемента ComboBox в указанный буфер
+
+			MessageBox(hwnd, sz_buffer, "Info", MB_OK | MB_ICONINFORMATION);
+		
+		}
+		break;
+		case IDCANCEL: EndDialog(hwnd, 0); break;
+
+		}
 		break;
 	case WM_CLOSE:
 		EndDialog(hwnd, 0);
